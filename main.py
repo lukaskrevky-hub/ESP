@@ -15,7 +15,7 @@ WAKE_LOW = 1300
 WAKE_HIGH = 2700
 
 # Časovače
-IDLE_TIMEOUT = 10     # Sekundy do usnutí
+IDLE_TIMEOUT = 15     # Sekundy do usnutí
 SLEEP_INTERVAL = 300  # Pulsed polling ve spánku
 
 # 1. KONTROLA POHYBU (Blesková kontrola před startem rádia)
@@ -122,5 +122,6 @@ while True:
         ble.stop() # Bezpečné vypnutí rádia
         time.sleep_ms(50) # Krátká pauza
         machine.deepsleep(SLEEP_INTERVAL)
+
 
     time.sleep_ms(20)
