@@ -15,7 +15,7 @@ WAKE_LOW = 1300
 WAKE_HIGH = 2700
 
 # Časovače
-IDLE_TIMEOUT = 15     
+IDLE_TIMEOUT = 600     
 SLEEP_INTERVAL = 300  
 
 # 1. KONTROLA POHYBU 
@@ -56,7 +56,7 @@ class BLEJoystick:
     def ble_irq(self, event, data):
         if event == 1: 
             self.connected = True
-            print(">>> PRIPOJENO <<<")
+            print(">>> PRIPOJENO k Raspberry Pi <<<")
         elif event == 2:
             self.connected = False
             print(">>> ODPOJENO <<<")
@@ -87,30 +87,48 @@ class BLEJoystick:
 ble = BLEJoystick()
 last_cmd = "CENTER"
 last_time = time.time()
+last_print_time = time.ticks_ms()  # Časovač pro výpis do konzole
 
-while True:
-    x, y, btn = read_inputs()
-    
-    cmd = "CENTER"
-    if btn: cmd = "SELECT"
-    elif y < 1500: cmd = "UP"
-    elif y > 2400: cmd = "DOWN"
-    elif x < 1500: cmd = "SELECT" # Doleva = Select (nebo podle potreby)
-    elif x > 2400: cmd = "RIGHT"
+print("Joystick úspěšně nastartován, čekám na pohyb...")
 
-    user_active = (cmd != "CENTER") or btn
-    if user_active:
-        last_time = time.time()
+try:
+    while True:
+        x, y, btn = read_inputs()
+        
+        cmd = "CENTER"
+        if btn: cmd = "SELECT"
+        elif y < 1500: cmd = "UP"
+        elif y > 2400: cmd = "DOWN"
+        elif x < 1500: cmd = "LEFT"   
+        elif x > 2400: cmd = "RIGHT"
 
-    # Odesílání: Posíláme i CENTER, aby RPi vědělo, že jsme pustili páčku
-    if cmd != last_cmd:
-        ble.send(cmd) 
-        last_cmd = cmd
-        time.sleep_ms(150)
+        user_active = (cmd != "CENTER") or btn
+        if user_active:
+            last_time = time.time()
 
-    if (time.time() - last_time) > IDLE_TIMEOUT:
-        ble.stop()
-        time.sleep_ms(50)
-        machine.deepsleep(SLEEP_INTERVAL)
+        # VÝPIS DO KONZOLE KAŽDOU PŮL SEKUNDU (500 ms)
+        current_time_ms = time.ticks_ms()
+        if time.ticks_diff(current_time_ms, last_print_time) >= 500:
+            print(f"Aktuální stav páčky: {cmd} (X: {x}, Y: {y})")
+            last_print_time = current_time_ms
 
-    time.sleep_ms(20)
+        # OKAMŽITÉ ODESLÁNÍ PŘI ZMĚNĚ (Aby web reagoval hned)
+        if cmd != last_cmd:
+            ble.send(cmd) 
+            last_cmd = cmd
+            time.sleep_ms(150) # Krátká pauza proti nechtěným dvojklikům
+
+        # USÍNÁNÍ PO NEAKTIVITĚ
+        if (time.time() - last_time) > IDLE_TIMEOUT:
+            print("Neaktivita, přecházím do režimu spánku...")
+            ble.stop()
+            time.sleep_ms(50)
+            machine.deepsleep(SLEEP_INTERVAL)
+
+        time.sleep_ms(20) # Krátká pauza pro plynulý běh smyčky
+
+except KeyboardInterrupt:
+    # Tento blok se vykoná, když v Thonny klikneš na STOP (Ctrl+C)
+    print("\n--- PROGRAM PŘERUŠEN UŽIVATELEM ---")
+    ble.stop()
+    print("Bluetooth vypnuto. Thonny je nyní připraveno pro nahrávání.")
