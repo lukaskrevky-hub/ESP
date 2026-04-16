@@ -35,9 +35,10 @@ PIN_VRY = 35    # Analogový pin pro osu Y
 PIN_SW  = 26    # Digitální pin pro stisk tlačítka joysticku
 
 # Prahové hodnoty pro detekci pohybu joysticku (ADC vrací 0 až 4095)
-# Hodnoty mimo středové pásmo (1300-2700) jsou vyhodnoceny jako aktivní pohyb
-WAKE_LOW = 1300
-WAKE_HIGH = 2700
+# Hodnoty byly upraveny pro pacienty s horší motorikou (tzv. větší mrtvá zóna).
+# Aby systém zareagoval, musí být páčka vychýlena téměř do krajních poloh.
+WAKE_LOW = 200
+WAKE_HIGH = 3800
 
 # Parametry pro řízení spotřeby energie
 IDLE_TIMEOUT = 30       # Čas (v sekundách), po kterém přejde zařízení do spánku při nečinnosti
@@ -217,13 +218,13 @@ try:
         # Přečtení aktuálního stavu senzorů
         x, y, btn = read_inputs()
 
-        # Vyhodnocení konkrétního směru podle přednastavených mezí
+        # Vyhodnocení konkrétního směru podle přednastavených mezí z globální proměnné
         cmd = "CENTER"
         if btn: cmd = "SELECT"
-        elif y < 1500: cmd = "UP"
-        elif y > 2400: cmd = "DOWN"
-        elif x < 1500: cmd = "LEFT"   
-        elif x > 2400: cmd = "RIGHT"
+        elif y < WAKE_LOW: cmd = "UP"
+        elif y > WAKE_HIGH: cmd = "DOWN"
+        elif x < WAKE_LOW: cmd = "LEFT"   
+        elif x > WAKE_HIGH: cmd = "RIGHT"
 
         # Kontrola, zda uživatel aktuálně interaguje
         user_active = (cmd != "CENTER") or btn
