@@ -76,7 +76,7 @@ if machine.reset_cause() == machine.DEEPSLEEP_RESET:
     if not is_moving:
         machine.deepsleep(SLEEP_INTERVAL)
 
-# Standardně držíme oba Wi-Fi moduly vypnuté (žerou nejvíce energie)
+# Standardně držíme oba Wi-Fi moduly vypnuté (berou nejvíce energie)
 wlan = network.WLAN(network.STA_IF); wlan.active(False)
 ap = network.WLAN(network.AP_IF); ap.active(False)
 
@@ -157,11 +157,11 @@ class BLEJoystick:
             self.conn_handle = None
             self.connected = False
             print(">>> ODPOJENO <<<")
-            # Pokud se nevypínáme záměrně, začneme se znovu vysílat (advertisovat)
+            # Pokud se nevypíná záměrně, začne se znovu vysílat
             if not self.shutting_down:
                 self.advertise()
         elif event == 3: 
-            # UDÁLOST (_IRQ_GATTS_WRITE): Raspberry Pi zapsalo data do naší charakteristiky (Příjem)
+            # UDÁLOST (_IRQ_GATTS_WRITE): Raspberry Pi zapsalo data do charakteristiky (Příjem)
             conn_handle, value_handle = data
             if value_handle == self.rx_handle:
                 # Přečteme zprávu a dekódujeme ji
