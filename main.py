@@ -22,9 +22,9 @@ from micropython import const    # Konstanty pro optimalizaci využití paměti 
 # 2. KONFIGURACE SÍTĚ A AKTUALIZACÍ (OTA)
 # ==========================================
 # Tyto údaje slouží pro jednorázové připojení k internetu při požadavku na aktualizaci
-WIFI_SSID = "DOPLNIT_WIFI_JMENO"
-WIFI_PASS = "DOPLNIT_WIFI_HESLO"
-OTA_URL   = "http://DOPLNIT_URL_OD_VEDOUCIHO_KDE_JE_SOUBOR/main.py"
+WIFI_SSID = "WIFI_JMENO"
+WIFI_PASS = "WIFI_HESLO"
+OTA_URL   = "http://URL_PRO_STAZENI_AKTUALIZACE/main.py"
 
 # ==========================================
 # 3. KONFIGURACE HARDWARU (PINY A PRAHY)
